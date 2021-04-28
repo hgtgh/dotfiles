@@ -1,0 +1,42 @@
+#!/bin/bash
+set -Eeo pipefail
+
+select_version() {
+  PS3="Please select a version: "
+  echo "Version available:"
+  select version in ${installed_php_versions}; do
+    [[ "$REPLY" == "exit" ]] && break
+
+    if [[ ${installed_php_versions[*]} =~ $version ]]; then
+      printf "\033[32mVersion selected: %s\033[m\n" $version
+      switch_php "$version"
+      exit
+    fi
+    printf "\033[33mInvalid selection: %s\033[m\n" "$REPLY"
+  done
+}
+
+switch_php() {
+  php_version=$1
+  shift
+
+  value="{"
+
+  for other_version in ${installed_php_versions[*]}; do
+    if [ "${other_version}" != "${php_version}" ]; then
+      value="${value} brew unlink php@${other_version};"
+    fi
+  done
+
+  value="${value} brew link php@${php_version} --force --overwrite; } &> /dev/null && php -v"
+
+  eval "$value"
+}
+
+installed_php_versions=$(brew ls --versions | grep -E 'php(@.*)?\s' | grep -o '\d\.\d' | uniq | sort)
+
+if [[ -z "$1" ]]; then
+  select_version
+else
+  switch_php "$1"
+fi
