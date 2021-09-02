@@ -1,18 +1,26 @@
+[user]
+	name = Hugo-T
+	email = 27848278+T-Hugo@users.noreply.github.com
+
 [alias]
 	# List aliases.	
 	aliases = !"git config -l | grep ^alias | cut -c 7- |  awk -F'=' '{printf \"\\033[36m%-15s\\033[0m %s\\n\", $1, substr($0,length($1)+2)}'"
 
 	# Switch to a branch, creating it if necessary.
-	go = "!f() { git checkout -b \"$1\" 2> /dev/null || git checkout c"$1\"; }; f"
+	go = "!f() { git checkout -b \"$1\" 2> /dev/null || git checkout \"$1\"; }; f"
 
 	# Amend the currently staged files to the latest commit.
 	amend = commit --amend --reuse-message=HEAD
+
+	unstage = restore --staged
+	unadd = reset HEAD
+	uncommit = reset --soft HEAD~1
 
 	# Credit an author on the latest commit.
 	credit = "!f() { git commit --amend --author \"$1 <$2>\" -C HEAD; }; f"
 
 	# Show the working tree status using the short-format.
-	s = status -s #gfh
+	s = status -s
 
 	# Shows the commit logs
 	lg = log --pretty=custom --date=short
@@ -38,27 +46,29 @@
 [pretty]
 	custom = "%C(yellow)%h %C(magenta)%G? %C(blue)%>(10)%ad%C(reset)  %s  %C(green)[%an] %C(auto)%d"
 	#                    |             |                 |             |             |            └─ decorations (branchs, heads, tags or remotes)
-    #                    │             │                 │             │             └─ author name
-    #                    │             │                 │             └─ message
-    #                    │             │                 └─ date (format respects --date= option)
-    #                    │             └─ gpg status for a signed commit
-    #                    └─ hash (abbreviated)
+	#                    │             │                 │             │             └─ author name
+	#                    │             │                 │             └─ message
+	#                    │             │                 └─ date (format respects --date= option)
+	#                    │             └─ gpg status for a signed commit
+	#                    └─ hash (abbreviated)
 
 [color]
-    ui = auto
+	ui = auto
 
 [color "branch"]
-    current = yellow reverse
-    local = yellow
-    remote = green
+	current = yellow reverse
+	local = yellow
+	remote = green
 
 [color "diff"]
-    meta = yellow
-    frag = magenta
-    old = red
-    new = green
+	meta = yellow
+	frag = magenta
+	old = red
+	new = green
 
 [color "status"]
-    added = green
-    changed = yellow
-    untracked = cyan
+	added = green
+	changed = yellow
+	untracked = cyan
+[core]
+	excludesfile = ~/.gitignore_global
