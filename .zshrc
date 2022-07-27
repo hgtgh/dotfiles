@@ -15,13 +15,14 @@ plugins=(
     common-aliases
     jsontools
     transfer
-    zsh-syntax-highlighting
-    zsh-autosuggestions
 )
 
 source $ZSH/oh-my-zsh.sh
 
 # User configuration
+
+source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
 
 # Shortcuts
 alias dl="cd ~/Downloads"
