@@ -45,6 +45,14 @@ alias showdesktop="defaults write com.apple.finder CreateDesktop -bool true && k
 alias ip="dig +short myip.opendns.com @resolver1.opendns.com -4"
 alias localip="ipconfig getifaddr en0"
 
+# youtube-dl
+alias ytv="youtube-dl -f bestvideo+bestaudio"
+alias yta="youtube-dl -x --audio-format best"
+alias yta-aac="youtube-dl -x --audio-format aac"
+alias yta-flac="youtube-dl -x --audio-quality 0 --audio-format flac"
+alias yta-m4a="youtube-dl -x --audio-format m4a"
+alias yta-mp3="youtube-dl -x --audio-format mp3"
+alias yta-opus="youtube-dl -x --audio-format opus"
 alias sail='[ -f sail ] && bash sail || bash vendor/bin/sail'
 
 # Pure theme
