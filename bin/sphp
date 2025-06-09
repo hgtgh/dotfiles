@@ -1,42 +1,69 @@
 #!/bin/bash
 set -Eeo pipefail
 
-select_version() {
-  PS3="Please select a version: "
-  echo "Version available:"
-  select version in ${installed_php_versions}; do
-    [[ "$REPLY" == "exit" ]] && break
+# Ensure Homebrew is installed
+if ! command -v brew &> /dev/null; then
+  echo -e "\033[31mError:\033[0m Homebrew is not installed. Aborting."
+  exit 1
+fi
 
-    if [[ ${installed_php_versions[*]} =~ $version ]]; then
-      printf "\033[32mVersion selected: %s\033[m\n" $version
-      switch_php "$version"
-      exit
+# Get the list of installed PHP versions via Homebrew, as an array
+installed_php_versions=($(brew ls --versions | grep -E 'php(@.*)?\s' | grep -o '\d\.\d' | uniq | sort))
+
+# Display the currently active PHP version
+echo -e "Current PHP version: \033[36m$(php -v | head -n1)\033[0m"
+
+# Function to allow interactive selection of a PHP version
+select_version() {
+  PS3="Please select a PHP version (type the number, or 'exit' to quit): "
+  echo "Available PHP versions:"
+  select version in "${installed_php_versions[@]}"; do
+    if [[ "$REPLY" == "exit" ]]; then
+      echo "Exiting without changing PHP version."
+      break
     fi
-    printf "\033[33mInvalid selection: %s\033[m\n" "$REPLY"
+
+    # Check if the selected version is in the list
+    if [[ ${installed_php_versions[*]} =~ $version ]]; then
+      echo -e "\033[32mSelected version: $version\033[0m"
+      switch_php "$version"
+      exit 0
+    fi
+
+    echo -e "\033[33mInvalid selection: $REPLY\033[0m"
   done
 }
 
+# Function to switch to the selected PHP version
 switch_php() {
   php_version=$1
-  shift
 
-  value="{"
+  echo -e "Switching to PHP $php_version..."
 
-  for other_version in ${installed_php_versions[*]}; do
-    if [ "${other_version}" != "${php_version}" ]; then
-      value="${value} brew unlink php@${other_version};"
+  # Unlink all other PHP versions
+  for other_version in "${installed_php_versions[@]}"; do
+    if [[ "$other_version" != "$php_version" ]]; then
+      brew unlink "php@$other_version" &> /dev/null
     fi
   done
 
-  value="${value} brew link php@${php_version} --force --overwrite; } &> /dev/null && php -v"
+  # Link the desired PHP version
+  brew link "php@$php_version" --force --overwrite &> /dev/null
 
-  eval "$value"
+  # Display new PHP version
+  new_version=$(php -r 'echo PHP_VERSION;')
+  echo -e "\033[32mSuccessfully switched to PHP $new_version\033[0m"
 }
 
-installed_php_versions=$(brew ls --versions | grep -E 'php(@.*)?\s' | grep -o '\d\.\d' | uniq | sort)
-
+# Main logic
 if [[ -z "$1" ]]; then
   select_version
 else
-  switch_php "$1"
+  if [[ ${installed_php_versions[*]} =~ $1 ]]; then
+    switch_php "$1"
+  else
+    echo -e "\033[31mError:\033[0m PHP version '$1' is not installed via Homebrew."
+    echo "Available versions: ${installed_php_versions[*]}"
+    exit 1
+  fi
 fi
